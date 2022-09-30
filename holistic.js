@@ -170,44 +170,37 @@ function onResults(results) {
     
     // Draw Hand bounding box 
     //Both are present
+    let all_coo = []
     if(results.leftHandLandmarks && results.rightHandLandmarks){
-      let all_coo = results.leftHandLandmarks.concat(results.rightHandLandmarks)
-      console.log(all_coo)
-
-      let all_x = []
-      let all_y = []
-      all_coo.forEach(element => {
-        all_x.push(element.x)
-      });
-      all_coo.forEach(element => {
-        all_y.push(element.y)
-      });
-
-      console.log(all_x,all_y)
-      let tl_x = Math.min(...all_x)
-      let tl_y = Math.min(...all_y)
-
-      let br_x = Math.max(...all_x)
-      let br_y = Math.max(...all_y)
-
-      let height= br_y - tl_y
-      let width = br_x - tl_x
-
-      console.log(canvasElement.width, canvasElement.height)
-
-       
-      canvasCtx.strokeRect(tl_x*canvasElement.width,tl_y*canvasElement.height,width*canvasElement.width,height*canvasElement.height); // fill in the pixel at (10,10)
-
-
-
-
+      all_coo = results.leftHandLandmarks.concat(results.rightHandLandmarks)
     }else if(results.leftHandLandmarks){
-
+      all_coo = results.leftHandLandmarks
     }else if(results.rightHandLandmarks){
-
+      all_coo = results.rightHandLandmarks
     }
+    let all_x = []
+    let all_y = []
+    all_coo.forEach(element => {
+      all_x.push(element.x)
+    });
+    all_coo.forEach(element => {
+      all_y.push(element.y)
+    });
 
+    let tl_x = Math.min(...all_x)
+    let tl_y = Math.min(...all_y)
 
+    let br_x = Math.max(...all_x)
+    let br_y = Math.max(...all_y)
+
+    let height= br_y - tl_y
+    let width = br_x - tl_x
+     
+    canvasCtx.strokeRect(
+      tl_x*canvasElement.width,
+      tl_y*canvasElement.height,
+      width*canvasElement.width,
+      height*canvasElement.height);
 
     canvasCtx.restore();
 }
