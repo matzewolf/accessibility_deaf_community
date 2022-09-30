@@ -83,64 +83,68 @@ function connect(ctx, connectors) {
 let activeEffect = 'mask';
 const COLOR_LEFT = 'rgb(235,105,233)'
 const COLOR_RIGHT = 'rgb(235,105,233)'
+
 function onResults(results) {
-    // Hide the spinner.
-    document.body.classList.add('loaded');
-    // Remove landmarks we don't want to draw.
-    removeLandmarks(results);
-    // Update the frame rate.
-    fpsControl.tick();
-    // Draw the overlays.
-    canvasCtx.save();
-    canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-    if (results.segmentationMask) {
-        canvasCtx.drawImage(results.segmentationMask, 0, 0, canvasElement.width, canvasElement.height);
-        // Only overwrite existing pixels.
-        if (activeEffect === 'mask' || activeEffect === 'both') {
-            canvasCtx.globalCompositeOperation = 'source-in';
-            // This can be a color or a texture or whatever...
-            canvasCtx.fillStyle = '#00FF007F';
-            canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
-        }
-        else {
-            canvasCtx.globalCompositeOperation = 'source-out';
-            canvasCtx.fillStyle = '#0000FF7F';
-            canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
-        }
-        // Only overwrite missing pixels.
-        canvasCtx.globalCompositeOperation = 'destination-atop';
-        canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
-        canvasCtx.globalCompositeOperation = 'source-over';
-    }
-    else {
-        canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
-    }
-    // Connect elbows to hands. Do this first so that the other graphics will draw
-    // on top of these marks.
-    canvasCtx.lineWidth = 5;
-    if (results.poseLandmarks) {
-        if (results.rightHandLandmarks) {
-            canvasCtx.strokeStyle = 'white';
-            connect(canvasCtx, [[
-                    results.poseLandmarks[mpHolistic.POSE_LANDMARKS.RIGHT_ELBOW],
-                    results.rightHandLandmarks[0]
-                ]]);
-        }
-        if (results.leftHandLandmarks) {
-            canvasCtx.strokeStyle = 'white';
-            connect(canvasCtx, [[
-                    results.poseLandmarks[mpHolistic.POSE_LANDMARKS.LEFT_ELBOW],
-                    results.leftHandLandmarks[0]
-                ]]);
-        }
-    }
-    // Pose...
+  // Hide the spinner.
+  document.body.classList.add('loaded');
+  // Remove landmarks we don't want to draw.
+  removeLandmarks(results);
+  // Update the frame rate.
+  fpsControl.tick();
+  // Draw the overlays.
+  canvasCtx.save();
+  canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+  if (results.segmentationMask) {
+      canvasCtx.drawImage(results.segmentationMask, 0, 0, canvasElement.width, canvasElement.height);
+      // Only overwrite existing pixels.
+      if (activeEffect === 'mask' || activeEffect === 'both') {
+          canvasCtx.globalCompositeOperation = 'source-in';
+          // This can be a color or a texture or whatever...
+          canvasCtx.fillStyle = '#00FF007F';
+          canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
+      }
+      else {
+          canvasCtx.globalCompositeOperation = 'source-out';
+          canvasCtx.fillStyle = '#0000FF7F';
+          canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
+      }
+      // Only overwrite missing pixels.
+      canvasCtx.globalCompositeOperation = 'destination-atop';
+      canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+      canvasCtx.globalCompositeOperation = 'source-over';
+  }
+  else {
+      canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+  }
+  // Connect elbows to hands. Do this first so that the other graphics will draw
+  // on top of these marks.
+  canvasCtx.lineWidth = 5;
+  if (results.poseLandmarks) {
+      if (results.rightHandLandmarks) {
+          canvasCtx.strokeStyle = 'white';
+          connect(canvasCtx, [[
+                  results.poseLandmarks[mpHolistic.POSE_LANDMARKS.RIGHT_ELBOW],
+                  results.rightHandLandmarks[0]
+              ]]);
+      }
+      if (results.leftHandLandmarks) {
+          canvasCtx.strokeStyle = 'white';
+          connect(canvasCtx, [[
+                  results.poseLandmarks[mpHolistic.POSE_LANDMARKS.LEFT_ELBOW],
+                  results.leftHandLandmarks[0]
+              ]]);
+      }
+  }
+  // Pose...
+  if(results.poseLandmarks) {
     drawingUtils.drawConnectors(canvasCtx, results.poseLandmarks, mpHolistic.POSE_CONNECTIONS, { color: 'white' });
     drawingUtils.drawLandmarks(canvasCtx, Object.values(mpHolistic.POSE_LANDMARKS_LEFT)
         .map(index => results.poseLandmarks[index]), { visibilityMin: 0.65, color: 'white', fillColor: COLOR_LEFT });
     drawingUtils.drawLandmarks(canvasCtx, Object.values(mpHolistic.POSE_LANDMARKS_RIGHT)
         .map(index => results.poseLandmarks[index]), { visibilityMin: 0.65, color: 'white', fillColor: COLOR_RIGHT });
-    // Hands...
+  }
+  // Hands...
+  if(results.rightHandLandmarks) {
     drawingUtils.drawConnectors(canvasCtx, results.rightHandLandmarks, mpHolistic.HAND_CONNECTIONS, { color: 'white' });
     drawingUtils.drawLandmarks(canvasCtx, results.rightHandLandmarks, {
         color: 'white',
@@ -150,6 +154,8 @@ function onResults(results) {
             return drawingUtils.lerp(data.from.z, -0.15, .1, 10, 1);
         }
     });
+  }
+  if(results.leftHandLandmarks) {
     drawingUtils.drawConnectors(canvasCtx, results.leftHandLandmarks, mpHolistic.HAND_CONNECTIONS, { color: 'white' });
     drawingUtils.drawLandmarks(canvasCtx, results.leftHandLandmarks, {
         color: 'white',
@@ -159,7 +165,9 @@ function onResults(results) {
             return drawingUtils.lerp(data.from.z, -0.15, .1, 10, 1);
         }
     });
-    // Face...
+  }
+  // Face...
+  if(results.faceLandmarks) {
     drawingUtils.drawConnectors(canvasCtx, results.faceLandmarks, mpHolistic.FACEMESH_TESSELATION, { color: '#C0C0C070', lineWidth: 1 });
     drawingUtils.drawConnectors(canvasCtx, results.faceLandmarks, mpHolistic.FACEMESH_RIGHT_EYE, { color: COLOR_RIGHT });
     drawingUtils.drawConnectors(canvasCtx, results.faceLandmarks, mpHolistic.FACEMESH_RIGHT_EYEBROW, { color: COLOR_RIGHT });
@@ -167,51 +175,46 @@ function onResults(results) {
     drawingUtils.drawConnectors(canvasCtx, results.faceLandmarks, mpHolistic.FACEMESH_LEFT_EYEBROW, { color: COLOR_LEFT });
     //drawingUtils.drawConnectors(canvasCtx, results.faceLandmarks, mpHolistic.FACEMESH_FACE_OVAL, { color: '#E0E0E0', lineWidth: 5 });
     drawingUtils.drawConnectors(canvasCtx, results.faceLandmarks, mpHolistic.FACEMESH_LIPS, { color: COLOR_LEFT, lineWidth: 5 });
+  }
+  // Draw Hand bounding box 
+  let all_coo = []
+  if(results.leftHandLandmarks && results.rightHandLandmarks){
+    all_coo = results.leftHandLandmarks.concat(results.rightHandLandmarks)
+  }else if(results.leftHandLandmarks){
+    all_coo = results.leftHandLandmarks
+  }else if(results.rightHandLandmarks){
+    all_coo = results.rightHandLandmarks
+  }
+  let all_x = []
+  let all_y = []
+  all_coo.forEach(element => {
+    all_x.push(element.x)
+  });
+  all_coo.forEach(element => {
+    all_y.push(element.y)
+  });
+
+  let tl_x = Math.min(...all_x)
+  let tl_y = Math.min(...all_y)
+
+  let br_x = Math.max(...all_x)
+  let br_y = Math.max(...all_y)
+
+  let height= br_y - tl_y
+  let width = br_x - tl_x
     
-    // Draw Hand bounding box 
-    //Both are present
-    let all_coo = []
-    if(results.leftHandLandmarks && results.rightHandLandmarks){
-      all_coo = results.leftHandLandmarks.concat(results.rightHandLandmarks)
-    }else if(results.leftHandLandmarks){
-      all_coo = results.leftHandLandmarks
-    }else if(results.rightHandLandmarks){
-      all_coo = results.rightHandLandmarks
-    }
-    let all_x = []
-    let all_y = []
-    all_coo.forEach(element => {
-      all_x.push(element.x)
-    });
-    all_coo.forEach(element => {
-      all_y.push(element.y)
-    });
+  canvasCtx.strokeRect(
+    tl_x*canvasElement.width,
+    tl_y*canvasElement.height,
+    width*canvasElement.width,
+    height*canvasElement.height);
 
-    let tl_x = Math.min(...all_x)
-    let tl_y = Math.min(...all_y)
-
-    let br_x = Math.max(...all_x)
-    let br_y = Math.max(...all_y)
-
-    let height= br_y - tl_y
-    let width = br_x - tl_x
-     
-    canvasCtx.strokeRect(
-      tl_x*canvasElement.width,
-      tl_y*canvasElement.height,
-      width*canvasElement.width,
-      height*canvasElement.height);
-
-    canvasCtx.restore();
+  canvasCtx.restore();
 }
-
 
 const holistic = new mpHolistic.Holistic(config);
 
-
 holistic.onResults(onResults);
-
-
 
 // Present a control panel through which the user can manipulate the solution
 // options.
