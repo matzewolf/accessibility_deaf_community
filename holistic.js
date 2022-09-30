@@ -34,6 +34,8 @@ function testSupport(supportedDevices) {
 const controls = window;
 const mpHolistic = window;
 const drawingUtils = window;
+
+console.log(window)
 const config = { locateFile: (file) => {
         return `https://cdn.jsdelivr.net/npm/@mediapipe/holistic@` +
             `${mpHolistic.VERSION}/${file}`;
@@ -79,6 +81,8 @@ function connect(ctx, connectors) {
     }
 }
 let activeEffect = 'mask';
+const COLOR_LEFT = 'rgb(235,105,233)'
+const COLOR_RIGHT = 'rgb(235,105,233)'
 function onResults(results) {
     // Hide the spinner.
     document.body.classList.add('loaded');
@@ -133,14 +137,14 @@ function onResults(results) {
     // Pose...
     drawingUtils.drawConnectors(canvasCtx, results.poseLandmarks, mpHolistic.POSE_CONNECTIONS, { color: 'white' });
     drawingUtils.drawLandmarks(canvasCtx, Object.values(mpHolistic.POSE_LANDMARKS_LEFT)
-        .map(index => results.poseLandmarks[index]), { visibilityMin: 0.65, color: 'white', fillColor: 'rgb(255,138,0)' });
+        .map(index => results.poseLandmarks[index]), { visibilityMin: 0.65, color: 'white', fillColor: COLOR_LEFT });
     drawingUtils.drawLandmarks(canvasCtx, Object.values(mpHolistic.POSE_LANDMARKS_RIGHT)
-        .map(index => results.poseLandmarks[index]), { visibilityMin: 0.65, color: 'white', fillColor: 'rgb(0,217,231)' });
+        .map(index => results.poseLandmarks[index]), { visibilityMin: 0.65, color: 'white', fillColor: COLOR_RIGHT });
     // Hands...
     drawingUtils.drawConnectors(canvasCtx, results.rightHandLandmarks, mpHolistic.HAND_CONNECTIONS, { color: 'white' });
     drawingUtils.drawLandmarks(canvasCtx, results.rightHandLandmarks, {
         color: 'white',
-        fillColor: 'rgb(0,217,231)',
+        fillColor: COLOR_RIGHT,
         lineWidth: 2,
         radius: (data) => {
             return drawingUtils.lerp(data.from.z, -0.15, .1, 10, 1);
@@ -149,7 +153,7 @@ function onResults(results) {
     drawingUtils.drawConnectors(canvasCtx, results.leftHandLandmarks, mpHolistic.HAND_CONNECTIONS, { color: 'white' });
     drawingUtils.drawLandmarks(canvasCtx, results.leftHandLandmarks, {
         color: 'white',
-        fillColor: 'rgb(255,138,0)',
+        fillColor: COLOR_LEFT,
         lineWidth: 2,
         radius: (data) => {
             return drawingUtils.lerp(data.from.z, -0.15, .1, 10, 1);
@@ -157,16 +161,65 @@ function onResults(results) {
     });
     // Face...
     drawingUtils.drawConnectors(canvasCtx, results.faceLandmarks, mpHolistic.FACEMESH_TESSELATION, { color: '#C0C0C070', lineWidth: 1 });
-    drawingUtils.drawConnectors(canvasCtx, results.faceLandmarks, mpHolistic.FACEMESH_RIGHT_EYE, { color: 'rgb(0,217,231)' });
-    drawingUtils.drawConnectors(canvasCtx, results.faceLandmarks, mpHolistic.FACEMESH_RIGHT_EYEBROW, { color: 'rgb(0,217,231)' });
-    drawingUtils.drawConnectors(canvasCtx, results.faceLandmarks, mpHolistic.FACEMESH_LEFT_EYE, { color: 'rgb(255,138,0)' });
-    drawingUtils.drawConnectors(canvasCtx, results.faceLandmarks, mpHolistic.FACEMESH_LEFT_EYEBROW, { color: 'rgb(255,138,0)' });
-    drawingUtils.drawConnectors(canvasCtx, results.faceLandmarks, mpHolistic.FACEMESH_FACE_OVAL, { color: '#E0E0E0', lineWidth: 5 });
-    drawingUtils.drawConnectors(canvasCtx, results.faceLandmarks, mpHolistic.FACEMESH_LIPS, { color: '#E0E0E0', lineWidth: 5 });
+    drawingUtils.drawConnectors(canvasCtx, results.faceLandmarks, mpHolistic.FACEMESH_RIGHT_EYE, { color: COLOR_RIGHT });
+    drawingUtils.drawConnectors(canvasCtx, results.faceLandmarks, mpHolistic.FACEMESH_RIGHT_EYEBROW, { color: COLOR_RIGHT });
+    drawingUtils.drawConnectors(canvasCtx, results.faceLandmarks, mpHolistic.FACEMESH_LEFT_EYE, { color: COLOR_LEFT });
+    drawingUtils.drawConnectors(canvasCtx, results.faceLandmarks, mpHolistic.FACEMESH_LEFT_EYEBROW, { color: COLOR_LEFT });
+    //drawingUtils.drawConnectors(canvasCtx, results.faceLandmarks, mpHolistic.FACEMESH_FACE_OVAL, { color: '#E0E0E0', lineWidth: 5 });
+    drawingUtils.drawConnectors(canvasCtx, results.faceLandmarks, mpHolistic.FACEMESH_LIPS, { color: COLOR_LEFT, lineWidth: 5 });
+    
+    // Draw Hand bounding box 
+    //Both are present
+    if(results.leftHandLandmarks && results.rightHandLandmarks){
+      let all_coo = results.leftHandLandmarks.concat(results.rightHandLandmarks)
+      console.log(all_coo)
+
+      let all_x = []
+      let all_y = []
+      all_coo.forEach(element => {
+        all_x.push(element.x)
+      });
+      all_coo.forEach(element => {
+        all_y.push(element.y)
+      });
+
+      console.log(all_x,all_y)
+      let tl_x = Math.min(...all_x)
+      let tl_y = Math.min(...all_y)
+
+      let br_x = Math.max(...all_x)
+      let br_y = Math.max(...all_y)
+
+      let height= br_y - tl_y
+      let width = br_x - tl_x
+
+      console.log(canvasElement.width, canvasElement.height)
+
+       
+      canvasCtx.strokeRect(tl_x*canvasElement.width,tl_y*canvasElement.height,width*canvasElement.width,height*canvasElement.height); // fill in the pixel at (10,10)
+
+
+
+
+    }else if(results.leftHandLandmarks){
+
+    }else if(results.rightHandLandmarks){
+
+    }
+
+
+
     canvasCtx.restore();
 }
+
+
 const holistic = new mpHolistic.Holistic(config);
+
+
 holistic.onResults(onResults);
+
+
+
 // Present a control panel through which the user can manipulate the solution
 // options.
 new controls
@@ -181,7 +234,7 @@ new controls
     effect: 'background',
 })
     .add([
-    new controls.StaticText({ title: 'MediaPipe Holistic' }),
+    new controls.StaticText({ title: 'Weekend Warriors' }),
     fpsControl,
     new controls.Toggle({ title: 'Selfie Mode', field: 'selfieMode' }),
     new controls.SourcePicker({
