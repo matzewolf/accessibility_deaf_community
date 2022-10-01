@@ -35,8 +35,8 @@ const controls = window;
 const mpHolistic = window;
 const drawingUtils = window;
 let counter = 0;
+let i = 0;
 
-console.log(window)
 const config = { locateFile: (file) => {
         return `https://cdn.jsdelivr.net/npm/@mediapipe/holistic@` +
             `${mpHolistic.VERSION}/${file}`;
@@ -87,12 +87,15 @@ const COLOR_RIGHT = 'rgb(235,105,233)'
 
 async function onResults(results) {
   counter++;
+  if(counter%40 == 0){
+    if(i < 3){
+        i++;
+    }
+  }
   // Hide the spinner.
   document.body.classList.add('loaded');
   // Remove landmarks we don't want to draw.
   removeLandmarks(results);
-  // Update the frame rate.
-  fpsControl.tick();
   // Draw the overlays.
   canvasCtx.save();
   canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
@@ -212,13 +215,17 @@ async function onResults(results) {
       width*canvasElement.width,
       height*canvasElement.height);
     
+    //Generate fake Text
+    fakeText(canvasCtx,canvasElement,i)
+
     if(isFinite(tl_x) && isFinite(tl_y) && isFinite(width) && isFinite(height) && counter % 16 == 0) {
       let handImage = canvasCtx.getImageData(
         tl_x*canvasElement.width,
         tl_y*canvasElement.height,
         width*canvasElement.width,
         height*canvasElement.height);
-      getGesture(handImage)
+      //getGesture(handImage)
+      //getGesture(canvasElement.toDataURL())
     }
   }
   canvasCtx.restore();
@@ -296,25 +303,35 @@ new controls
     }),
 ])
     .on(x => {
-    console.log(x)
     const options = x;
     videoElement.classList.toggle('selfie', options.selfieMode);
     activeEffect = x['effect'];
     holistic.setOptions(options);
 }); 
 
+let texts = ["","I am sick Doctor", "I have headache ", "Ok"]
+async function fakeText(ctx,canvasElement,i){
+    
+    ctx.font = "bold 80px Titillium Web, sans-serif";
+    
+    ctx.textAlign = "center";
+    ctx.fillRect(canvasElement.width/2 -400, canvasElement.height *0.85-80,800,100);
+    ctx.fillStyle="white"
+    ctx.fillText(texts[i], canvasElement.width/2, canvasElement.height *0.85);
+}
+
+
 async function getGesture(handImage) {
-  let blob = new Blob([handImage.data], {type: "octet/stream"});
+  //let blob = new Blob([handImage.data], {type: "octet/stream"});
   const response = await fetch("https://matthiaswolf-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/15d879f9-6c34-463d-845d-728edb192dbb/classify/iterations/Iteration2/image", {
     method: 'POST',
     headers: {
       'Content-Type': 'application/octet-stream',
       'Prediction-Key': 'bf60722c90364478a30e844f287954c5',
     },
-    body: blob,
+    body: handImage,
   });
     
   response.json().then(data => {
-    console.log(data);
   });
 }
