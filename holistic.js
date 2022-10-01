@@ -304,18 +304,14 @@ new controls
 }); 
 
 async function getGesture(handImage) {
-  let fakeCanvas = new HTMLCanvasElement()
-  let fakeCanvasCtx = fakeCanvas.getContext('2d');
-  fakeCanvasCtx.putImageData(handImage);
-  
+  let blob = new Blob([handImage.data], {type: "octet/stream"});
   const response = await fetch("https://matthiaswolf-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/15d879f9-6c34-463d-845d-728edb192dbb/classify/iterations/Iteration2/image", {
     method: 'POST',
     headers: {
-      'Accept': 'application/json',
       'Content-Type': 'application/octet-stream',
       'Prediction-Key': 'bf60722c90364478a30e844f287954c5',
     },
-    body: fakeCanvas.toBlob(),
+    body: blob,
   });
     
   response.json().then(data => {
