@@ -197,11 +197,11 @@ async function onResults(results) {
       all_y.push(element.y)
     });
 
-    let tl_x = Math.min(...all_x)
-    let tl_y = Math.min(...all_y)
+    let tl_x = Math.min(...all_x) - 0.08
+    let tl_y = Math.min(...all_y) - 0.08
 
-    let br_x = Math.max(...all_x)
-    let br_y = Math.max(...all_y)
+    let br_x = Math.max(...all_x) + 0.08
+    let br_y = Math.max(...all_y) + 0.08
 
     let height= br_y - tl_y
     let width = br_x - tl_x
