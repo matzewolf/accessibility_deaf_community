@@ -230,6 +230,8 @@ holistic.onResults(onResults);
 
 // Present a control panel through which the user can manipulate the solution
 // options.
+
+
 new controls
     .ControlPanel(controlsElement, {
     selfieMode: true,
@@ -294,6 +296,7 @@ new controls
     }),
 ])
     .on(x => {
+    console.log(x)
     const options = x;
     videoElement.classList.toggle('selfie', options.selfieMode);
     activeEffect = x['effect'];
