@@ -218,6 +218,7 @@ holistic.onResults(onResults);
 
 // Present a control panel through which the user can manipulate the solution
 // options.
+/*
 new controls
     .ControlPanel(controlsElement, {
     selfieMode: true,
@@ -287,3 +288,4 @@ new controls
     activeEffect = x['effect'];
     holistic.setOptions(options);
 }); 
+*/
