@@ -291,16 +291,3 @@ new controls
     holistic.setOptions(options);
 }); 
 
-
-
-holistic.setOptions({
-  effect: "background",
-enableSegmentation: false,
-minDetectionConfidence: 0.5,
-minTrackingConfidence: 0.5,
-modelComplexity: 1,
-selfieMode: true,
-smoothLandmarks: true,
-smoothSegmentation: true
-})
-
