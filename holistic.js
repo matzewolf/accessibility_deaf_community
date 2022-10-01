@@ -206,21 +206,45 @@ async function onResults(results) {
     let height= br_y - tl_y
     let width = br_x - tl_x
 
-    canvasCtx.strokeRect(
-      tl_x*canvasElement.width,
-      tl_y*canvasElement.height,
-      width*canvasElement.width,
-      height*canvasElement.height);
+    let canvas_tl_x = tl_x * canvasElement.width
+    let canvas_tl_y = tl_y * canvasElement.height
+    let canvas_width = width * canvasElement.width
+    let canvas_height = height * canvasElement.height
+
+    canvasCtx.strokeRect(canvas_tl_x, canvas_tl_y, canvas_width, canvas_height);
     
-    if(isFinite(tl_x) && isFinite(tl_y) && isFinite(width) && isFinite(height) && counter % 16 == 0) {
-      let handImage = canvasCtx.getImageData(
-        tl_x*canvasElement.width,
-        tl_y*canvasElement.height,
-        width*canvasElement.width,
-        height*canvasElement.height);
-      getGesture(handImage)
+    if(isFinite(tl_x) && isFinite(tl_y) && isFinite(width) && isFinite(height) && counter % 20 == 0) {
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas_width;
+      canvas.height = canvas_height;
+      const ctx = canvas.getContext("2d");
+      createImageBitmap(canvasElement, canvas_tl_x, canvas_tl_y, canvas_width, canvas_height).then((bitmap) => {
+        ctx.drawImage(bitmap, 0, 0);
+        const dataURL = canvas.toDataURL("image/jpeg");
+        const byteStr = atob(dataURL.split(',')[1])
+        let ab = new ArrayBuffer(byteStr.length);
+        let ia = new Uint8Array(ab);
+        for (let i = 0; i < byteStr.length; i++) {
+            ia[i] = byteStr.charCodeAt(i);
+        }
+        let blob = new Blob([ab], {type: 'image/jpeg'});
+        const options = {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'image/jpeg',
+            'Prediction-Key': 'bf60722c90364478a30e844f287954c5'
+          },
+          body: blob,
+        };
+  
+        fetch('https://matthiaswolf-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/15d879f9-6c34-463d-845d-728edb192dbb/classify/iterations/Iteration2/image', options)
+          .then(response => response.json())
+          .then(response => console.log(response))
+          .catch(err => console.error(err));
+        })
+      }
     }
-  }
+  
   canvasCtx.restore();
 }
 
@@ -302,19 +326,3 @@ new controls
     activeEffect = x['effect'];
     holistic.setOptions(options);
 }); 
-
-async function getGesture(handImage) {
-  let blob = new Blob([handImage.data], {type: "octet/stream"});
-  const response = await fetch("https://matthiaswolf-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/15d879f9-6c34-463d-845d-728edb192dbb/classify/iterations/Iteration2/image", {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/octet-stream',
-      'Prediction-Key': 'bf60722c90364478a30e844f287954c5',
-    },
-    body: blob,
-  });
-    
-  response.json().then(data => {
-    console.log(data);
-  });
-}
