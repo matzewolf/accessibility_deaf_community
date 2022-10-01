@@ -218,7 +218,7 @@ async function onResults(results) {
       canvas.width = canvas_width;
       canvas.height = canvas_height;
       const ctx = canvas.getContext("2d");
-      createImageBitmap(canvasElement, canvas_tl_x, canvas_tl_y, canvas_width, canvas_height).then((bitmap) => {
+      createImageBitmap(canvasElement, canvas_tl_x, canvas_tl_y, canvas_width, canvas_height).then(bitmap => {
         ctx.drawImage(bitmap, 0, 0);
         const dataURL = canvas.toDataURL("image/jpeg");
         const byteStr = atob(dataURL.split(',')[1])
@@ -239,7 +239,15 @@ async function onResults(results) {
   
         fetch('https://matthiaswolf-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/15d879f9-6c34-463d-845d-728edb192dbb/classify/iterations/Iteration2/image', options)
           .then(response => response.json())
-          .then(response => console.log(response))
+          .then(response => {
+            let all_prob = []
+            response.predictions.forEach(element => {
+              all_prob.push(element.probability)
+            });
+            const maxVal = Math.max.apply(Math, all_prob.map((i) => i));
+            const maxIndex = all_prob.indexOf(maxVal);
+            console.log(response.predictions[maxIndex].tagName)
+          })
           .catch(err => console.error(err));
         })
       }
