@@ -34,6 +34,7 @@ function testSupport(supportedDevices) {
 const controls = window;
 const mpHolistic = window;
 const drawingUtils = window;
+let counter = 0;
 
 console.log(window)
 const config = { locateFile: (file) => {
@@ -84,7 +85,8 @@ let activeEffect = 'mask';
 const COLOR_LEFT = 'rgb(235,105,233)'
 const COLOR_RIGHT = 'rgb(235,105,233)'
 
-function onResults(results) {
+async function onResults(results) {
+  counter++;
   // Hide the spinner.
   document.body.classList.add('loaded');
   // Remove landmarks we don't want to draw.
@@ -185,30 +187,40 @@ function onResults(results) {
   }else if(results.rightHandLandmarks){
     all_coo = results.rightHandLandmarks
   }
-  let all_x = []
-  let all_y = []
-  all_coo.forEach(element => {
-    all_x.push(element.x)
-  });
-  all_coo.forEach(element => {
-    all_y.push(element.y)
-  });
+  if(all_coo) {
+    let all_x = []
+    let all_y = []
+    all_coo.forEach(element => {
+      all_x.push(element.x)
+    });
+    all_coo.forEach(element => {
+      all_y.push(element.y)
+    });
 
-  let tl_x = Math.min(...all_x)
-  let tl_y = Math.min(...all_y)
+    let tl_x = Math.min(...all_x)
+    let tl_y = Math.min(...all_y)
 
-  let br_x = Math.max(...all_x)
-  let br_y = Math.max(...all_y)
+    let br_x = Math.max(...all_x)
+    let br_y = Math.max(...all_y)
 
-  let height= br_y - tl_y
-  let width = br_x - tl_x
+    let height= br_y - tl_y
+    let width = br_x - tl_x
+
+    canvasCtx.strokeRect(
+      tl_x*canvasElement.width,
+      tl_y*canvasElement.height,
+      width*canvasElement.width,
+      height*canvasElement.height);
     
-  canvasCtx.strokeRect(
-    tl_x*canvasElement.width,
-    tl_y*canvasElement.height,
-    width*canvasElement.width,
-    height*canvasElement.height);
-
+    if(isFinite(tl_x) && isFinite(tl_y) && isFinite(width) && isFinite(height) && counter % 16 == 0) {
+      let handImage = canvasCtx.getImageData(
+        tl_x*canvasElement.width,
+        tl_y*canvasElement.height,
+        width*canvasElement.width,
+        height*canvasElement.height);
+      getGesture(handImage)
+    }
+  }
   canvasCtx.restore();
 }
 
@@ -287,3 +299,23 @@ new controls
     activeEffect = x['effect'];
     holistic.setOptions(options);
 }); 
+
+async function getGesture(handImage) {
+  let fakeCanvas = new HTMLCanvasElement()
+  let fakeCanvasCtx = fakeCanvas.getContext('2d');
+  fakeCanvasCtx.putImageData(handImage);
+  
+  const response = await fetch("https://matthiaswolf-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/15d879f9-6c34-463d-845d-728edb192dbb/classify/iterations/Iteration2/image", {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/octet-stream',
+      'Prediction-Key': 'bf60722c90364478a30e844f287954c5',
+    },
+    body: fakeCanvas.toBlob(),
+  });
+    
+  response.json().then(data => {
+    console.log(data);
+  });
+}
