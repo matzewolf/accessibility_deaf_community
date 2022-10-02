@@ -101,3 +101,24 @@
     opacity: 0;
   }
  
+  .hello-image {
+    position: fixed;
+    z-index: 10;
+    left: 2vw;
+    top: 2vh;
+  }
+
+  .tumai-image {
+    position: fixed;
+    z-index: 10;
+    left: 2vw;
+    top: 24vh;
+  }
+
+  .hello-image img {
+    height: 20vh;
+  }
+
+  .tumai-image img {
+    width: 20vh;
+  }
