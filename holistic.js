@@ -269,8 +269,12 @@ holistic.onResults(onResults);
 
 async function showText(ctx,canvasElement){
     var key2Text = {
-        "foo": "I",
-        "Hello": "Love",
+        "am sick": "am sick",
+        "Hello": "Hello",
+        "I": "I",
+        "love": "love",
+        "Ok": "Ok",
+        "TUM.ai": "TUM.ai",
       };
 
     ctx.font = "bold 80px Titillium Web, sans-serif";
