@@ -186,6 +186,8 @@ async function onResults(results) {
     all_coo = results.leftHandLandmarks
   }else if(results.rightHandLandmarks){
     all_coo = results.rightHandLandmarks
+  } else {
+    displayText = "dummy text"
   }
   if(all_coo) {
     let all_x = []
