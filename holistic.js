@@ -246,7 +246,8 @@ async function onResults(results) {
             });
             const maxVal = Math.max.apply(Math, all_prob.map((i) => i));
             const maxIndex = all_prob.indexOf(maxVal);
-            console.log(response.predictions[maxIndex].tagName)
+            const resultText = response.predictions[maxIndex].tagName
+            console.log(resultText)
           })
           .catch(err => console.error(err));
         })
