@@ -237,7 +237,7 @@ async function onResults(results) {
           body: blob,
         };
   
-        fetch('https://matthiaswolf-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/15d879f9-6c34-463d-845d-728edb192dbb/classify/iterations/Iteration2/image', options)
+        fetch('https://matthiaswolf-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/15d879f9-6c34-463d-845d-728edb192dbb/classify/iterations/Iteration6/image', options)
           .then(response => response.json())
           .then(response => {
             let all_prob = []
