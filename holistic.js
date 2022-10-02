@@ -269,19 +269,19 @@ holistic.onResults(onResults);
 
 async function showText(ctx,canvasElement){
     var key2Text = {
-        "am sick": "am sick",
-        "Hello": "Hello",
-        "I": "I",
-        "love": "love",
-        "Ok": "Ok",
-        "TUM.ai": "TUM.ai",
-      };
+      // "am sick": "am sick",
+      "Hello": "Hello",
+      // "I": "I",
+      // "love": "love",
+      // "Ok": "Ok",
+      "TUM.ai": "TUM.ai",
+    };
 
     ctx.font = "bold 80px Titillium Web, sans-serif";
     ctx.textAlign = "center";
     ctx.fillRect(canvasElement.width/2 -400, canvasElement.height *0.85-80,800,100);
     ctx.fillStyle="white"
-    ctx.fillText(key2Text[displayText] || "", canvasElement.width/2, canvasElement.height *0.85);
+    ctx.fillText(key2Text[displayText] || "", canvasElement.width/2, canvasElement.height*0.85);
 }
 
 new controls
