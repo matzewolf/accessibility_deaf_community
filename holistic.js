@@ -35,8 +35,8 @@ const controls = window;
 const mpHolistic = window;
 const drawingUtils = window;
 let counter = 0;
+let displayText = "";
 
-console.log(window)
 const config = { locateFile: (file) => {
         return `https://cdn.jsdelivr.net/npm/@mediapipe/holistic@` +
             `${mpHolistic.VERSION}/${file}`;
@@ -212,6 +212,8 @@ async function onResults(results) {
     let canvas_height = height * canvasElement.height
 
     canvasCtx.strokeRect(canvas_tl_x, canvas_tl_y, canvas_width, canvas_height);
+    showText(canvasCtx,canvasElement)
+
     
     if(isFinite(tl_x) && isFinite(tl_y) && isFinite(width) && isFinite(height) && counter % 20 == 0) {
       const canvas = document.createElement("canvas");
@@ -248,6 +250,7 @@ async function onResults(results) {
             const maxIndex = all_prob.indexOf(maxVal);
             const resultText = response.predictions[maxIndex].tagName
             console.log(resultText)
+            displayText = resultText
           })
           .catch(err => console.error(err));
         })
@@ -264,6 +267,18 @@ holistic.onResults(onResults);
 // Present a control panel through which the user can manipulate the solution
 // options.
 
+async function showText(ctx,canvasElement){
+    var key2Text = {
+        "foo": "I",
+        "Hello": "Love",
+      };
+
+    ctx.font = "bold 80px Titillium Web, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillRect(canvasElement.width/2 -400, canvasElement.height *0.85-80,800,100);
+    ctx.fillStyle="white"
+    ctx.fillText(key2Text[displayText] || "", canvasElement.width/2, canvasElement.height *0.85);
+}
 
 new controls
     .ControlPanel(controlsElement, {
@@ -329,7 +344,6 @@ new controls
     }),
 ])
     .on(x => {
-    console.log(x)
     const options = x;
     videoElement.classList.toggle('selfie', options.selfieMode);
     activeEffect = x['effect'];
